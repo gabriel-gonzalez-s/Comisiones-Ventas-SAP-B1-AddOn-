@@ -1,0 +1,177 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{FBF538E0-7267-4C27-A51D-9518B2AC7338}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>ComisionesVentas</RootNamespace>
+    <AssemblyName>ComisionesVentas</AssemblyName>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup>
+    <!-- Experimental LocalAppData -->
+    <SBOStudioPath Condition=" '$(SBOStudioPath)' == '' AND Exists('$(LocalAppData)\Microsoft\VisualStudio\10.0Exp\Extensions\SAP\Business One Studio\1.0\SAPbouiCOM.dll')">$(LocalAppData)\Microsoft\VisualStudio\10.0Exp\Extensions\SAP\Business One Studio\1.0</SBOStudioPath>
+    <!-- Integrated Shell -->
+    <SBOStudioPath Condition=" '$(SBOStudioPath)' == '' AND Exists('$(DevEnvDir)\Extensions\SAP\Business One Studio\SAPbouiCOM.dll')">$(DevEnvDir)\Extensions\SAP\Business One Studio</SBOStudioPath>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject>ComisionesVentas.Program</StartupObject>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x86\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisIgnoreBuiltInRuleSets>true</CodeAnalysisIgnoreBuiltInRuleSets>
+    <CodeAnalysisIgnoreBuiltInRules>true</CodeAnalysisIgnoreBuiltInRules>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
+    <OutputPath>bin\x86\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisIgnoreBuiltInRuleSets>true</CodeAnalysisIgnoreBuiltInRuleSets>
+    <CodeAnalysisIgnoreBuiltInRules>true</CodeAnalysisIgnoreBuiltInRules>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x64\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+    <OutputPath>bin\x64\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="FuncionalidadesSDKB1">
+      <HintPath>..\FuncionalidadesSDKB1\bin\Debug\FuncionalidadesSDKB1.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Office.Interop.Excel, Version=12.0.0.0, Culture=neutral, PublicKeyToken=71e9bce111e9429c">
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+    </Reference>
+    <Reference Include="SAPBusinessOneSDK, Version=1.0.0.1, Culture=neutral, PublicKeyToken=c7c3cb60e45d119f, processorArchitecture=MSIL" />
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="CapaDatos\DConexion.cs" />
+    <Compile Include="CapaNegocios\NConexion.cs" />
+    <Compile Include="CapaPresentacion\BuscaPago.b1f.cs">
+      <DependentUpon>BuscaPago.b1f</DependentUpon>
+    </Compile>
+    <Compile Include="CapaPresentacion\BuscaProyecto.b1f.cs">
+      <DependentUpon>BuscaProyecto.b1f</DependentUpon>
+    </Compile>
+    <Compile Include="CapaPresentacion\BuscarPedido.b1f.cs">
+      <DependentUpon>BuscarPedido.b1f</DependentUpon>
+    </Compile>
+    <Compile Include="CapaPresentacion\Feriados.b1f.cs">
+      <DependentUpon>Feriados.b1f</DependentUpon>
+    </Compile>
+    <None Include="app.config" />
+    <None Include="CapaPresentacion\BuscaPago.b1f">
+      <FormCategory>UserForm</FormCategory>
+    </None>
+    <None Include="CapaPresentacion\BuscaProyecto.b1f">
+      <FormCategory>UserForm</FormCategory>
+    </None>
+    <None Include="CapaPresentacion\BuscarPedido.b1f">
+      <FormCategory>UserForm</FormCategory>
+    </None>
+    <None Include="CapaPresentacion\Comisiones.b1f">
+      <FormCategory>UserForm</FormCategory>
+    </None>
+    <Compile Include="CapaDatos\DParametros.cs" />
+    <Compile Include="CapaDatos\DPeriodo.cs" />
+    <Compile Include="CapaPresentacion\Comisiones.b1f.cs">
+      <DependentUpon>Comisiones.b1f</DependentUpon>
+    </Compile>
+    <Compile Include="CapaPresentacion\Parametros.b1f.cs">
+      <DependentUpon>Parametros.b1f</DependentUpon>
+    </Compile>
+    <Compile Include="CapaPresentacion\GrupoComi.b1f.cs">
+      <DependentUpon>GrupoComi.b1f</DependentUpon>
+    </Compile>
+    <Compile Include="Program.cs" />
+    <Compile Include="CapaNegocios\Menu.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <None Include="CapaPresentacion\Feriados.b1f">
+      <FormCategory>UserForm</FormCategory>
+    </None>
+    <None Include="CapaPresentacion\Parametros.b1f">
+      <FormCategory>UserForm</FormCategory>
+    </None>
+    <None Include="CapaPresentacion\GrupoComi.b1f">
+      <FormCategory>UserForm</FormCategory>
+    </None>
+  </ItemGroup>
+  <ItemGroup />
+  <ItemGroup>
+    <COMReference Include="Microsoft.Office.Interop.Access.Dao">
+      <Guid>{4AC9E1DA-5BAD-4AC7-86E3-24F4CDCECA28}</Guid>
+      <VersionMajor>12</VersionMajor>
+      <VersionMinor>0</VersionMinor>
+      <Lcid>0</Lcid>
+      <WrapperTool>primary</WrapperTool>
+      <Isolated>False</Isolated>
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+    </COMReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
