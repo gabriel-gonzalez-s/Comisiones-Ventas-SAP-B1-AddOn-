@@ -119,6 +119,7 @@ namespace ComisionesVentas
             this.Button5 = ((SAPbouiCOM.Button)(this.GetItem("Item_55").Specific));
             this.Button5.ClickAfter += new SAPbouiCOM._IButtonEvents_ClickAfterEventHandler(this.Button5_ClickAfter);
             this.Button6 = ((SAPbouiCOM.Button)(this.GetItem("Item_56").Specific));
+            this.Button6.ClickAfter += new SAPbouiCOM._IButtonEvents_ClickAfterEventHandler(this.Button6_ClickAfter);
             this.EditText6 = ((SAPbouiCOM.EditText)(this.GetItem("Item_51").Specific));
             this.OnCustomInitialize();
 
@@ -914,7 +915,58 @@ namespace ComisionesVentas
             ProgressBarExtensions.Increment_ProgressBar(ref oProgBar, 1);
             ProgressBarExtensions.Close_ProgressBar(ref oProgBar);
 
-        }   
+        }
+        private void Button6_ClickAfter(object sboObject, SAPbouiCOM.SBOItemEventArg pVal)
+        {
+            try
+            {
+                if (Button2.Item.Enabled)
+                {
+                    string sql = "";
+                    oDTTable = oForm.DataSources.DataTables.Item("DT_PAG");
+
+                    switch (Button2.Caption.Trim())
+                    {
+                        case "Registrar Pago Premios":
+                            if (ComboBox3.Selected.Value.Trim() != "") //Si esta seleccionado un Vendedor, se registran todos y luego se actualiza el vendedor
+                            {
+                                sql = "EXEC  [dbo].[Min_Comisiones_Pagos_Premios_Periodo] 0 ";
+                                DT_SQL2.ExecuteQuery(sql);
+
+                                Insertar_Pagos(DT_SQL2);
+
+                                Eliminar_Pagos(ComboBox3.Selected.Value, ComboBox0.Selected.Description);
+
+                                Insertar_Pagos(oDTTable);
+                            }
+                            else
+                            {
+                                Insertar_Pagos(oDTTable);
+                            }
+
+                            Button2.Caption = "Actualizar Pagos";
+                            Button2.Item.Enabled = false;
+
+                            Application.SBO_Application.StatusBar.SetText("Registro de Pagos Premios Exitoso", SAPbouiCOM.BoMessageTime.bmt_Short, SAPbouiCOM.BoStatusBarMessageType.smt_Success);
+                            break;
+                        case "Actualizar Pago Premios":
+                            //Insertar_Comisiones_Historico(oForm.DataSources.DataTables.Item("DT_PAGOINI"));
+
+                            Eliminar_Pagos(ComboBox3.Selected.Value, ComboBox0.Selected.Description);
+
+                            Insertar_Pagos(oDTTable);
+
+                            Button2.Item.Enabled = false;
+
+                            Application.SBO_Application.StatusBar.SetText("Actualizacion de Pagos Premios Exitoso", SAPbouiCOM.BoMessageTime.bmt_Short, SAPbouiCOM.BoStatusBarMessageType.smt_Success);
+                            break;
+                    }
+                }
+            }
+            catch (Exception)
+            { }
+
+        }
         private void Grid1_GotFocusAfter(object sboObject, SAPbouiCOM.SBOItemEventArg pVal)
         {
             try
@@ -1175,6 +1227,7 @@ namespace ComisionesVentas
             try
             {
                 oForm.Freeze(true);
+                cVend = cVend.Trim().Length == 0 ? "0": cVend;
                 string sql = "EXEC  [dbo].[Min_Comisiones_Consultar_Pagos_Venta_Periodo] 0,'" + Periodo + "'";
                 oDTTable = oForm.DataSources.DataTables.Item("DT_PAG");
                 oDTTable.ExecuteQuery(sql);
@@ -1329,13 +1382,29 @@ namespace ComisionesVentas
             {
                 oForm.Freeze(true);
 
-                string sql = "SET NOCOUNT ON;SET FMTONLY OFF;EXEC [SBO_COMERCIAL].[dbo].[Min_Comisiones_Calculo_PCV] 0,1";
-                oDTTable = oForm.DataSources.DataTables.Item("DT_PREMI");
-                oDTTable.ExecuteQuery(sql);
+                //string sql = "EXEC  [dbo].[Min_Comisiones_Consultar_Pagos_Venta_Periodo] 0,'" + Periodo + "'";
+                //oDTTable = oForm.DataSources.DataTables.Item("DT_PAG");
+                //oDTTable.ExecuteQuery(sql);
 
-                sql = "EXEC  [dbo].[Min_Comisiones_Pagos_Premios_Periodo] '" + sVend + "'";
-                oDTTable = oForm.DataSources.DataTables.Item("DT_PREMI");
-                oDTTable.ExecuteQuery(sql);
+                //if (oDTTable.Rows.Count > 0 && !oDTTable.IsEmpty)
+                //{
+
+                    string sql = "SET NOCOUNT ON;SET FMTONLY OFF;EXEC [SBO_COMERCIAL].[dbo].[Min_Comisiones_Calculo_PCV] 0,1";
+                    oDTTable = oForm.DataSources.DataTables.Item("DT_PREMI");
+                    oDTTable.ExecuteQuery(sql);
+
+                    sql = "EXEC  [dbo].[Min_Comisiones_Pagos_Premios_Periodo] '" + sVend + "'";
+                    oDTTable = oForm.DataSources.DataTables.Item("DT_PREMI");
+                    oDTTable.ExecuteQuery(sql);
+
+                    Button6.Caption = "Registrar Premios";
+                    Button6.Item.Enabled = true;
+                //}
+                //else
+                //{
+                //    Button6.Caption = "Actualizar Premios";
+                //    Button6.Item.Enabled = false;
+                //}
 
                 StaticText14.Caption = "Total Registros: " + oDTTable.Rows.Count.ToString().Trim();
 
@@ -2117,6 +2186,7 @@ namespace ComisionesVentas
                 SAPbouiCOM.DataTable DT_PAG = oForm.DataSources.DataTables.Item("DT_PAG");
                 SAPbouiCOM.DataTable DT_TOTPAG = oForm.DataSources.DataTables.Item("DT_TOTPAG");
                 SAPbouiCOM.DataTable DT_SQL = oForm.DataSources.DataTables.Item("DT_SQL");
+                //SAPbouiCOM.DataTable DT_SQL = oForm.DataSources.DataTables.Item("DT_SQL");
 
                 Double TotalPagos = 0.0;
                 Double TotalNOAplican = 0.0;
@@ -2237,5 +2307,7 @@ namespace ComisionesVentas
         private SAPbouiCOM.Button Button5;
         private SAPbouiCOM.Button Button6;
         private SAPbouiCOM.EditText EditText6;
+
+        
     }
 }
