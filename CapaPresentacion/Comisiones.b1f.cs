@@ -730,7 +730,7 @@ namespace ComisionesVentas
         {
             string cVend = ComboBox5.Selected.Value;
 
-            Cargar_Grid_Pagos_Premios(cVend);
+            Cargar_Grid_Pagos_Premios(cVend, ComboBox0.Selected.Description);
 
         }
         private void Grid0_ClickAfter(object sboObject, SAPbouiCOM.SBOItemEventArg pVal)
@@ -920,43 +920,43 @@ namespace ComisionesVentas
         {
             try
             {
-                if (Button2.Item.Enabled)
+                if (Button6.Item.Enabled)
                 {
                     string sql = "";
-                    oDTTable = oForm.DataSources.DataTables.Item("DT_PAG");
+                    oDTTable = oForm.DataSources.DataTables.Item("DT_PREMI");
 
-                    switch (Button2.Caption.Trim())
+                    switch (Button6.Caption.Trim())
                     {
-                        case "Registrar Pago Premios":
-                            if (ComboBox3.Selected.Value.Trim() != "") //Si esta seleccionado un Vendedor, se registran todos y luego se actualiza el vendedor
+                        case "Registrar Premios":
+                            if (ComboBox5.Selected.Value.Trim() != "") //Si esta seleccionado un Vendedor, se registran todos y luego se actualiza el vendedor seleccionado
                             {
                                 sql = "EXEC  [dbo].[Min_Comisiones_Pagos_Premios_Periodo] 0 ";
                                 DT_SQL2.ExecuteQuery(sql);
 
-                                Insertar_Pagos(DT_SQL2);
+                                Insertar_Pagos_Premios(DT_SQL2);
 
-                                Eliminar_Pagos(ComboBox3.Selected.Value, ComboBox0.Selected.Description);
+                                Eliminar_Pagos_Premios(ComboBox5.Selected.Value, ComboBox0.Selected.Description);
 
-                                Insertar_Pagos(oDTTable);
+                                Insertar_Pagos_Premios(oDTTable);
                             }
                             else
                             {
-                                Insertar_Pagos(oDTTable);
+                                Insertar_Pagos_Premios(oDTTable);
                             }
 
-                            Button2.Caption = "Actualizar Pagos";
-                            Button2.Item.Enabled = false;
+                            Button6.Caption = "Actualizar Premios";
+                            Button6.Item.Enabled = false;
 
                             Application.SBO_Application.StatusBar.SetText("Registro de Pagos Premios Exitoso", SAPbouiCOM.BoMessageTime.bmt_Short, SAPbouiCOM.BoStatusBarMessageType.smt_Success);
                             break;
-                        case "Actualizar Pago Premios":
+                        case "Actualizar Premios":
                             //Insertar_Comisiones_Historico(oForm.DataSources.DataTables.Item("DT_PAGOINI"));
 
-                            Eliminar_Pagos(ComboBox3.Selected.Value, ComboBox0.Selected.Description);
+                            Eliminar_Pagos_Premios(ComboBox5.Selected.Value, ComboBox0.Selected.Description);
 
-                            Insertar_Pagos(oDTTable);
+                            Insertar_Pagos_Premios(oDTTable);
 
-                            Button2.Item.Enabled = false;
+                            Button6.Item.Enabled = false;
 
                             Application.SBO_Application.StatusBar.SetText("Actualizacion de Pagos Premios Exitoso", SAPbouiCOM.BoMessageTime.bmt_Short, SAPbouiCOM.BoStatusBarMessageType.smt_Success);
                             break;
@@ -1376,21 +1376,27 @@ namespace ComisionesVentas
             {  oForm.Freeze(false); }
 
         }
-        private void Cargar_Grid_Pagos_Premios(string sVend)
+        private void Cargar_Grid_Pagos_Premios(string sVend, string Periodo)
         {
             try
             {
                 oForm.Freeze(true);
 
-                //string sql = "EXEC  [dbo].[Min_Comisiones_Consultar_Pagos_Venta_Periodo] 0,'" + Periodo + "'";
-                //oDTTable = oForm.DataSources.DataTables.Item("DT_PAG");
-                //oDTTable.ExecuteQuery(sql);
+                sVend = sVend.Trim().Length == 0 ? "0" : sVend;
+                string sql = "EXEC  [dbo].[Min_Comisiones_Consultar_Pagos_Premios_Periodo] 0,'" + Periodo + "'";
+                oDTTable = oForm.DataSources.DataTables.Item("DT_PREMI");
+                oDTTable.ExecuteQuery(sql);
 
-                //if (oDTTable.Rows.Count > 0 && !oDTTable.IsEmpty)
-                //{
-
-                    string sql = "SET NOCOUNT ON;SET FMTONLY OFF;EXEC [SBO_COMERCIAL].[dbo].[Min_Comisiones_Calculo_PCV] 0,1";
-                    oDTTable = oForm.DataSources.DataTables.Item("DT_PREMI");
+                if (oDTTable.Rows.Count > 0 && !oDTTable.IsEmpty)
+                {
+                    sql = "EXEC  [dbo].[Min_Comisiones_Consultar_Pagos_Premios_Periodo] '" + sVend + "','" + Periodo + "'";
+                    oDTTable.ExecuteQuery(sql);
+                    Button2.Caption = "Actualizar Premios";
+                    Button2.Item.Enabled = false;
+                }
+                else
+                {
+                    sql = "SET NOCOUNT ON;SET FMTONLY OFF;EXEC [SBO_COMERCIAL].[dbo].[Min_Comisiones_Calculo_PCV] 0,1";
                     oDTTable.ExecuteQuery(sql);
 
                     sql = "EXEC  [dbo].[Min_Comisiones_Pagos_Premios_Periodo] '" + sVend + "'";
@@ -1399,14 +1405,22 @@ namespace ComisionesVentas
 
                     Button6.Caption = "Registrar Premios";
                     Button6.Item.Enabled = true;
-                //}
-                //else
-                //{
-                //    Button6.Caption = "Actualizar Premios";
-                //    Button6.Item.Enabled = false;
-                //}
+                }
 
-                StaticText14.Caption = "Total Registros: " + oDTTable.Rows.Count.ToString().Trim();
+               StaticText14.Caption = "Total Registros: " + oDTTable.Rows.Count.ToString().Trim();
+
+                Formatear_Grid_PagosPremios();
+               GridExtensions.RowNumberGrid(Grid4);
+            }
+            catch (Exception){}
+            finally
+            { oForm.Freeze(false); }
+        }
+        private static void Formatear_Grid_PagosPremios()
+        {
+            try
+            {
+                oGrid = (SAPbouiCOM.Grid)oForm.Items.Item("Item_35").Specific;
 
                 //SAPbouiCOM.EditTextColumn oEditCol = (SAPbouiCOM.EditTextColumn)Grid0.Columns.Item(0);
                 //oEditCol.LinkedObjectType = "17";
@@ -1418,38 +1432,35 @@ namespace ComisionesVentas
                 List<int> ColumnasEditables = new List<int>(new int[] { 5, 6, 8 });
                 List<int> ColumnasEnfasis = new List<int>(new int[] { 2, 4, 7, 11 });
 
-                Grid4.Columns.Item(0).TitleObject.Sortable = true;
-                Grid4.Columns.Item(2).TitleObject.Sortable = true;
-                   
+                oGrid.Columns.Item(0).TitleObject.Sortable = true;
+                oGrid.Columns.Item(2).TitleObject.Sortable = true;
 
-                for (int iCols = 0; iCols <= Grid4.Columns.Count - 1; iCols++)
+
+                for (int iCols = 0; iCols <= oGrid.Columns.Count - 1; iCols++)
                 {
-                    Grid4.Columns.Item(iCols).Editable = false;
-                    Grid4.Columns.Item(iCols).BackColor = Commons.Color_RGB_SAP(255, 255, 255);
+                    oGrid.Columns.Item(iCols).Editable = false;
+                    oGrid.Columns.Item(iCols).BackColor = Commons.Color_RGB_SAP(255, 255, 255);
 
                     if (ColumnasEditables.Contains(iCols))
                     {
-                        Grid4.Columns.Item(iCols).Editable = true;
-                        Grid4.Columns.Item(iCols).BackColor = Commons.Color_RGB_SAP(240, 255, 255);
+                        oGrid.Columns.Item(iCols).Editable = true;
+                        oGrid.Columns.Item(iCols).BackColor = Commons.Color_RGB_SAP(240, 255, 255);
                     }
                     else
-                        Grid4.Columns.Item(iCols).Editable = false;
+                        oGrid.Columns.Item(iCols).Editable = false;
 
                     if (ColumnasJustificadas.Contains(iCols))
                     {
-                        Grid4.Columns.Item(iCols).RightJustified = true;
+                        oGrid.Columns.Item(iCols).RightJustified = true;
                     }
                     if (ColumnasEnfasis.Contains(iCols))
                     {
-                        Grid4.Columns.Item(iCols).BackColor = Commons.Color_RGB_SAP(250, 250, 210);
+                        oGrid.Columns.Item(iCols).BackColor = Commons.Color_RGB_SAP(250, 250, 210);
                     }
                 }
-
-                GridExtensions.RowNumberGrid(Grid4);
             }
-            catch (Exception){}
-            finally
-            { oForm.Freeze(false); }
+            catch { }
+            
         }
         private static void Formatear_Grid_PagosVentas()
         {
@@ -1821,6 +1832,54 @@ namespace ComisionesVentas
             bProgBar = ProgressBarExtensions.Close_ProgressBar(ref oProgBar);
 
         }
+        private void Insertar_Pagos_Premios(SAPbouiCOM.DataTable oDT)
+        {
+            bool bProgBar = false;
+            //********************* PROGRESS BAR
+            bProgBar = ProgressBarExtensions.Create_ProgressBar(ref oProgBar, "Insertando Datos Pagos Premios", 2);
+
+            NumberFormatInfo nfi = new NumberFormatInfo();
+            nfi.NumberDecimalSeparator = ".";
+
+            string sql = "";
+            DateTime FechaHoraAct = DateTime.Now;
+
+            for (int i = 0; i <= oDT.Rows.Count - 1; i++)
+            {
+                try
+                {
+                    sql = @"EXEC  [dbo].[Min_Comisiones_Insertar_Pagos_Premios_Periodo] '" + oDT.GetValue(0, i) + "','"
+                                                                                          + oDT.GetValue(1, i).ToString().Replace("'", "''") + "','"
+                                                                                          + oDT.GetValue(2, i) + "','"
+                                                                                          + oDT.GetValue(3, i).ToString().Replace("'", "''") + "','"
+                                                                                          + Convert.ToDecimal(oDT.GetValue(4, i)).ToString(nfi) + ",'"
+                                                                                          + Convert.ToDecimal(oDT.GetValue(5, i)).ToString(nfi) + ",'"
+                                                                                          + Convert.ToDecimal(oDT.GetValue(6, i)).ToString(nfi) + ",'"
+                                                                                          + Convert.ToDecimal(oDT.GetValue(7, i)).ToString(nfi) + ",'"
+                                                                                          + Convert.ToDecimal(oDT.GetValue(8, i)).ToString(nfi) + ",'"
+                                                                                          + oDT.GetValue(9, i) + "','"
+                                                                                          + oDT.GetValue(10, i) + "','"
+                                                                                          + oDT.GetValue(11, i) + "','"
+                                                                                          + NConexion.sCodUsuActual + "','"
+                                                                                          + FechaHoraAct.ToString("yyyy-MM-dd HH:mm:ss") + "'"
+                                                                                          + ComboBox0.Selected.Description + "','" ;
+
+                    DT_SQL.ExecuteQuery(sql);
+                }
+                catch (Exception) { }
+            }
+            // Aplicar Consulta para que Actualice tabla temporal de Premios por Proyectos
+            try
+            {
+                sql = "EXEC  [dbo].[Min_Comisiones_Pagos_Premios_Periodo] 0";
+                DT_SQL.ExecuteQuery(sql);
+            }
+            catch (Exception) { }
+
+            //********************* PROGRESS BAR
+            bProgBar = ProgressBarExtensions.Increment_ProgressBar(ref oProgBar, 1);
+            bProgBar = ProgressBarExtensions.Close_ProgressBar(ref oProgBar);
+        }
         private void Eliminar_Pagos(string sVend, string Periodo)
         {
             try
@@ -1831,6 +1890,17 @@ namespace ComisionesVentas
             }
             catch (Exception)
             {            }
+        }
+        private void Eliminar_Pagos_Premios(string sVend, string Periodo)
+        {
+            try
+            {
+                sVend = sVend.Trim() == "" ? "0" : sVend;
+                string sql = @"EXEC  [dbo].[Min_Comisiones_Eliminar_Pagos_Premios_Periodo] '" + sVend + "','" + Periodo + "'";
+                DT_SQL.ExecuteQuery(sql);
+            }
+            catch (Exception)
+            { }
         }
         private void Eliminar_Comisiones(string sVend, string Periodo)
         {
