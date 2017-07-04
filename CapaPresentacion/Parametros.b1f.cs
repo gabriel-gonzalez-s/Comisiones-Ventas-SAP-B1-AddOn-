@@ -271,7 +271,7 @@ namespace ComisionesVentas
                 MatrixExtensions.SetCellValue(Matrix0, "C_0_6", pVal.Row, sVal);
 
             }
-            catch (Exception x) { }
+            catch (Exception) { }
         }
         private void Grid0_ClickBefore(object sboObject, SAPbouiCOM.SBOItemEventArg pVal, out bool BubbleEvent)
         {
@@ -660,7 +660,7 @@ namespace ComisionesVentas
                 MatrixExtensions.SelectMatrixRow(ref oMatrix, 1);
 
             }
-            catch (Exception e) { }
+            catch (Exception) { }
             finally
             {
                 oForm.Freeze(false);
@@ -753,7 +753,7 @@ namespace ComisionesVentas
                                 Value = Value.Trim().Length == 0 ? null : Value;
                                 DT_GRID.SetValue(sfield, DT_GRID.Rows.Count - 1, Value);
                             }
-                            catch (Exception e) { }
+                            catch (Exception) { }
                         }
                     }
                 }
@@ -762,7 +762,7 @@ namespace ComisionesVentas
                 catch (Exception) { }
                 ((SAPbouiCOM.Grid)oForm.Items.Item("Item_15").Specific).Rows.SelectedRows.Add(0);
             }
-            catch (Exception e) { }
+            catch (Exception) { }
             finally { oForm.Freeze(false); }
         }
         private static void Cargar_Grid_Comisiones_Vend()
@@ -800,7 +800,7 @@ namespace ComisionesVentas
                                 Value = Value.Trim().Length == 0 ? null : Value;
                                 DT_GRID.SetValue(sfield, DT_GRID.Rows.Count - 1, Value);
                             }
-                            catch (Exception e) { }
+                            catch (Exception) { }
                         }
                     }
                 }
@@ -809,7 +809,7 @@ namespace ComisionesVentas
                 catch (Exception) { }
                 ((SAPbouiCOM.Grid)oForm.Items.Item("Item_18").Specific).Rows.SelectedRows.Add(0);
             }
-            catch (Exception e) { }
+            catch (Exception) { }
             finally { oForm.Freeze(false); }
         }
         private static void Formatear_Grid_Comisiones(SAPbouiCOM.Grid oGrid)
@@ -932,12 +932,12 @@ namespace ComisionesVentas
                                 Value = Value.Replace(",", ".");
                             oDBDataSource.SetValue(sfield, oDBDataSource.Size - 1, Value);
                         }
-                        catch (Exception e) { }
+                        catch (Exception) { }
                     }
                 }
                 Matrix4.LoadFromDataSource();
             }
-            catch (Exception e) { }
+            catch (Exception) { }
             finally { oForm.Freeze(false); }
         }
         private void Form_LoadAfter(SAPbouiCOM.SBOItemEventArg pVal)
@@ -1008,7 +1008,7 @@ namespace ComisionesVentas
             //            Value = oDBDataSource.GetValue(sfield, i);
             //            Value = Value.Trim().Length == 0 ? null : Value;
             //        }
-            //        catch (Exception e) { }
+            //        catch (Exception) { }
             //    }
             //}
 
@@ -1079,7 +1079,7 @@ namespace ComisionesVentas
         // //    // Add the new row, including children, to database
         // //    oGeneralParams = oGeneralService.Add(oGeneralData);
         // //}
-        // //catch //(Exception ex)
+        // //catch //(Exception)
         // //{
         // //    //Interaction.MsgBox(ex.Message, (Microsoft.VisualBasic.MsgBoxStyle)(0), null);
         // //}

@@ -12,6 +12,7 @@ namespace ComisionesVentas.CapaPresentacion
         private static SAPbouiCOM.Form oForm = null;
         private static SAPbouiCOM.UserDataSource oUDS = null;
         private static string Ultima_Busqueda = "";
+        public static string sOrigf { get; set; }
 
         public BuscaProyecto()
         {
@@ -70,8 +71,9 @@ namespace ComisionesVentas.CapaPresentacion
         private void Form_ResizeAfter(SAPbouiCOM.SBOItemEventArg pVal)
         {
             oUDS = oForm.DataSources.UserDataSources.Item("UD_1");
-            string sOrig = oUDS.ValueEx;
-            if (sOrig == "Pagos")
+            sOrigf = oUDS.ValueEx;
+
+            if (sOrigf == "Pagos")
                 CheckBox0.Item.Visible = true;
             else
                 CheckBox0.Item.Visible = false;
@@ -156,7 +158,7 @@ namespace ComisionesVentas.CapaPresentacion
                     SAPbouiCOM.Form oFormP = Application.SBO_Application.Forms.Item(oUDS.ValueEx);
                     oForm.Close();
 
-                    switch (sOrig)
+                    switch (sOrigf)
                     {
                         case "Consultas":
                             ((SAPbouiCOM.EditText)oFormP.Items.Item("Item_23").Specific).String = sProyecto;
@@ -164,6 +166,10 @@ namespace ComisionesVentas.CapaPresentacion
                         case "Pagos":
                             Comisiones.Agregar_Proyecto_Grid_Pagos(sProyecto);
                             break;
+                        case "Premios":
+                            Comisiones.Agregar_Proyecto_Grid_Premios(sProyecto);
+                            break;
+
                     }
 
                     

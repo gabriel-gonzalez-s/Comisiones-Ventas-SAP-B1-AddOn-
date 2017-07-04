@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using SAPbouiCOM.Framework;
 using System.Globalization;
-
+using FuncionalidadesSDKB1;
 
 namespace ComisionesVentas
 {
@@ -108,17 +108,12 @@ namespace ComisionesVentas
                         Parametros.Parametros_MenuEvent(ref pVal, out BubbleEvent);
                         break;
                     case "ComisionesVentas.Comisiones":
-                        Comisiones.Parametros_MenuEvent(ref pVal, out BubbleEvent);
+                        Comisiones.Comisiones_MenuEvent(ref pVal, out BubbleEvent);
                         break;
-                    default:
-                        Application.SBO_Application.Menus.RemoveEx("Asignar Proyecto a Documento Pagado");
-                        Application.SBO_Application.Menus.RemoveEx("MARCAR: Pago Sin PCV Registrada");
-                        Application.SBO_Application.Menus.RemoveEx("MARCAR: Pago NO APLICABLE a Comision");
-                break;
                 }
 
             }
-            catch (Exception)
+            catch (Exception e)
             {
             }
 
@@ -139,11 +134,11 @@ namespace ComisionesVentas
                         Parametros.Parametros_RightClickEvent(ref eventInfo, out BubbleEvent);
                         break;
                     case "ComisionesVentas.Comisiones":
-                        Comisiones.Parametros_RightClickEvent(ref eventInfo, out BubbleEvent);        
+                        Comisiones.Comisiones_RightClickEvent(ref eventInfo, out BubbleEvent);        
                         break;
                 }
             }
-            catch (Exception)
+            catch (Exception e)
             {
             }
 

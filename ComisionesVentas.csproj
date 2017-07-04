@@ -114,6 +114,9 @@
     <Compile Include="CapaPresentacion\BuscarPedido.b1f.cs">
       <DependentUpon>BuscarPedido.b1f</DependentUpon>
     </Compile>
+    <Compile Include="CapaPresentacion\BuscaVendedor.b1f.cs">
+      <DependentUpon>BuscaVendedor.b1f</DependentUpon>
+    </Compile>
     <Compile Include="CapaPresentacion\Feriados.b1f.cs">
       <DependentUpon>Feriados.b1f</DependentUpon>
     </Compile>
@@ -125,6 +128,9 @@
       <FormCategory>UserForm</FormCategory>
     </None>
     <None Include="CapaPresentacion\BuscarPedido.b1f">
+      <FormCategory>UserForm</FormCategory>
+    </None>
+    <None Include="CapaPresentacion\BuscaVendedor.b1f">
       <FormCategory>UserForm</FormCategory>
     </None>
     <None Include="CapaPresentacion\Comisiones.b1f">

@@ -41,7 +41,7 @@ namespace ComisionesVentas
                 //  If the manu already exists this code will fail
                 oMenus.AddEx(oCreationPackage);
             }
-            catch //(Exception e)
+            catch //(Exception)
             {
 
             }
@@ -79,7 +79,7 @@ namespace ComisionesVentas
                 oMenus.AddEx(oCreationPackage);
 
             }
-            catch //(Exception er)
+            catch //(Exception)
             { //  Menu already exists
                 Application.SBO_Application.SetStatusBarMessage("Menu Already Exists", SAPbouiCOM.BoMessageTime.bmt_Short, true);
             }
