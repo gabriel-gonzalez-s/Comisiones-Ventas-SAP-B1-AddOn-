@@ -128,6 +128,10 @@ namespace ComisionesVentas
             this.Button6.ClickAfter += new SAPbouiCOM._IButtonEvents_ClickAfterEventHandler(this.Button6_ClickAfter);
             this.EditText6 = ((SAPbouiCOM.EditText)(this.GetItem("Item_51").Specific));
             this.Folder9 = ((SAPbouiCOM.Folder)(this.GetItem("Item_58").Specific));
+            this.StaticText13 = ((SAPbouiCOM.StaticText)(this.GetItem("Item_57").Specific));
+            this.EditText7 = ((SAPbouiCOM.EditText)(this.GetItem("Item_59").Specific));
+            this.StaticText16 = ((SAPbouiCOM.StaticText)(this.GetItem("Item_60").Specific));
+            this.EditText8 = ((SAPbouiCOM.EditText)(this.GetItem("Item_61").Specific));
             this.OnCustomInitialize();
 
         }
@@ -340,6 +344,9 @@ namespace ComisionesVentas
                              oStatic = (SAPbouiCOM.StaticText)oForm.Items.Item("Item_21").Specific;
                             oStatic.Caption = "Total Registros: " + oDTTable.Rows.Count.ToString().Trim();
                             GridExtensions.RowNumberGrid(oGrid);
+
+                            if (((SAPbouiCOM.Button)oForm.Items.Item("Item_18").Specific).Item.Enabled == false)
+                                ((SAPbouiCOM.Button)oForm.Items.Item("Item_18").Specific).Item.Enabled = true;
 
                             break;
 
@@ -738,13 +745,13 @@ namespace ComisionesVentas
                 SAPbouiCOM.Grid oGridPag = (SAPbouiCOM.Grid)oForm.Items.Item("Item_11").Specific;
                 oGrid = (SAPbouiCOM.Grid)oForm.Items.Item("Item_47").Specific;
                 oGrid.Item.Top = oGridPag.Item.Top + oGridPag.Item.Height + 1;//oForm.Height - 118;
-                oGrid.Item.Left = oForm.Width - 863;
+                oGrid.Item.Left = oForm.Width - 1012;//863;
                 oGrid.Item.Height = 37;
-                oGrid.Item.Width = 822;
+                oGrid.Item.Width = 972;
 
                 for (int i = 0; i < oGrid.Columns.Count; i++)
                 {
-                    oGrid.Columns.Item(i).Width = 150;
+                    oGrid.Columns.Item(i).Width = 152;
                 }
 
                 SAPbouiCOM.RowHeaders oHeader = oGrid.RowHeaders;
@@ -826,7 +833,10 @@ namespace ComisionesVentas
                 Cargar_Combo_Vendedores(ComboBox5, true);
                 ComboBox5.Select(0, SAPbouiCOM.BoSearchKey.psk_Index);
                 ComboBoxExtensions.CleanComboBox(ComboBox5);
-                Cargar_Combo_Vendedores_Pagos_Periodo(ComboBox5, dDesde, dHasta);
+                if (Button6.Caption == "Actualizar Premios") // Si ya existen premios registrados, se toman los vendedores de los datos guardados, sino se toman desde los pagos.
+                    Cargar_Combo_Vendedores_Premios_Periodo(ComboBox5, ComboBox0.Selected.Description);
+                else
+                    Cargar_Combo_Vendedores_Pagos_Periodo(ComboBox5, dDesde, dHasta);
                 oForm.PaneLevel = PaneAct;
 
                 //bProgBar = ProgressBarExtensions.Increment_ProgressBar(ref oProgBar, 1);
@@ -1059,6 +1069,16 @@ namespace ComisionesVentas
                             ComboBoxExtensions.CleanComboBox(ComboBox3); // Recargar Combo Vendedores en caso de Agregar Nuevos
                             Cargar_Combo_Vendedores_Pagos_Periodo(ComboBox3, dDesde, dHasta);
 
+                            if (Button6.Caption == "Registrar Premios")
+                            {
+                                string cVend = ComboBox5.Selected.Value;
+
+                                Cargar_Grid_Pagos_Premios("", ComboBox0.Selected.Description);
+
+                                if (cVend.Trim().Length > 0)
+                                    Cargar_Grid_Pagos_Premios(cVend, ComboBox0.Selected.Description);
+                            }
+
                             Application.SBO_Application.StatusBar.SetText("Actualizacion de Pagos Exitoso", SAPbouiCOM.BoMessageTime.bmt_Short, SAPbouiCOM.BoStatusBarMessageType.smt_Success);
                             break;
                     }
@@ -1130,7 +1150,7 @@ namespace ComisionesVentas
                                 Button6.Item.Enabled = false;
 
                                 ComboBoxExtensions.CleanComboBox(ComboBox5); // Recargar Combo Vendedores en caso de Agregar Nuevos
-                                Cargar_Combo_Vendedores_Pagos_Periodo(ComboBox5, dDesde, dHasta);
+                                Cargar_Combo_Vendedores_Premios_Periodo(ComboBox5, ComboBox0.Selected.Description);
 
                                 Application.SBO_Application.StatusBar.SetText("Actualizacion de Pagos Premios Exitoso", SAPbouiCOM.BoMessageTime.bmt_Short, SAPbouiCOM.BoStatusBarMessageType.smt_Success);
                             }
@@ -1147,6 +1167,8 @@ namespace ComisionesVentas
         {
             try
             {
+                Grid1.Rows.SelectedRows.Add(pVal.Row);
+
                 int dtRow = Grid2.GetDataTableRowIndex(pVal.Row);
 
                 switch (pVal.ColUID)
@@ -1332,6 +1354,8 @@ namespace ComisionesVentas
                 {
                     Calcular_Valor_Premios(pVal.ColUID, dtRow, 0);
                     Colores_Celdas_Editables_Pagos_Premios(Grid4, pVal.Row);
+                    if (pVal.ColUID == "Monto Pago Cliente")
+                        Calcular_Totales_Pagos();
 
                     Button6.Item.Enabled = true;
                 }
@@ -1431,6 +1455,15 @@ namespace ComisionesVentas
                                   ,DATEFROMPARTS(LEFT([U_Nombre],4),RIGHT([U_Nombre],2),U_Fin) as Fin
                                   ,U_Valor_UF
 								  ,U_Valor_DMP
+								  ,CAST(U_Domingo as int) + CAST(U_Feriados as int) as 'Feriados'
+								  ,CAST(DATEDIFF(DAY
+												,DATEADD(MONTH,-1,DATEFROMPARTS(LEFT([U_Nombre],4),RIGHT([U_Nombre],2),U_Inicio))
+												,DATEFROMPARTS(LEFT([U_Nombre],4),RIGHT([U_Nombre],2),U_Fin))
+										as INT) + 1 -- Dias del Periodo
+										-  (CAST(U_Domingo as int) + CAST(U_Feriados as int)) -- Domingos + feriados
+										-  ([dbo].[DiasSabado] (DATEADD(MONTH,-1,DATEFROMPARTS(LEFT([U_Nombre],4),RIGHT([U_Nombre],2),U_Inicio))
+																 ,DATEFROMPARTS(LEFT([U_Nombre],4),RIGHT([U_Nombre],2),U_Fin)) --Sabados
+                                        ) as 'Habiles'
                             from [" + Program.sBDComercial.Trim() + "].[dbo].[@Z_COMI_PER] where U_Nombre = '" + Periodo  + "'";
 
             try
@@ -1445,6 +1478,10 @@ namespace ComisionesVentas
                 oUSerDataSource.Value = DT_SQL.GetValue("U_Valor_UF", 0).ToString();
                 oUSerDataSource = oForm.DataSources.UserDataSources.Item("UD_DMP");
                 oUSerDataSource.Value = DT_SQL.GetValue("U_Valor_DMP", 0).ToString();
+                oUSerDataSource = oForm.DataSources.UserDataSources.Item("UD_HAB");
+                oUSerDataSource.Value = DT_SQL.GetValue("Habiles", 0).ToString();
+                oUSerDataSource = oForm.DataSources.UserDataSources.Item("UD_FER");
+                oUSerDataSource.Value = DT_SQL.GetValue("Feriados", 0).ToString();
             }
             catch 
             {            }
@@ -1474,13 +1511,13 @@ namespace ComisionesVentas
 
             ComboBoxExtensions.LoadComboQueryDataTable(oCombo, DT_SQL, sql, 0, 1, true);
         }
-        private void Cargar_Combo_Vendedores_Premios_Periodo(SAPbouiCOM.ComboBox oCombo, DateTime fDesde, DateTime fHasta)
+        private void Cargar_Combo_Vendedores_Premios_Periodo(SAPbouiCOM.ComboBox oCombo, string Periodo)
         {
             try
             {
                 string sql = @"SELECT DISTINCT V.SlpCode , '(' + LTRIM(RTRIM(V.Memo)) + ') - ' + LTRIM(RTRIM(V.SlpName))   
                             FROM OSLP V join [@Z_COMI_PREMIOSPER] P ON V.SlpCode = P.[VendID]
-                            WHERE V.Active  = 'Y' AND V.SlpCode != -1 ";
+                            WHERE V.Active  = 'Y' AND V.SlpCode != -1  AND PeriodoID = '" + Periodo + "'";
 
                 ComboBoxExtensions.LoadComboQueryDataTable(oCombo, DT_SQL, sql, 0, 1, true);
             }
@@ -1732,7 +1769,8 @@ namespace ComisionesVentas
                StaticText14.Caption = "Total Registros: " + oDTTable.Rows.Count.ToString().Trim();
 
                 Formatear_Grid_PagosPremios();
-               GridExtensions.RowNumberGrid(Grid4);
+                GridExtensions.RowNumberGrid(Grid4);
+                Calcular_Totales_Pagos();
             }
             catch (Exception){}
             finally
@@ -1970,10 +2008,12 @@ namespace ComisionesVentas
                 oGrid.Columns.Item(20).Visible = false;
                 oGrid.Columns.Item(22).Visible = false;
                 oGrid.Columns.Item(23).Visible = false;
+                oGrid.Columns.Item(27).Visible = false;
+                oGrid.Columns.Item(28).Visible = false;
                 //Grid0.Columns.Item(14).Width = 200;
 
-                List<int> ColumnasJustificadas = new List<int>(new int[] { 2, 3, 4, 6, 7, 8, 9, 10, 11, 12, 13, 14, 24 });
-                List<int> ColumnasEditables = new List<int>(new int[] { 10, 11, 13, 14, 21 });
+                List<int> ColumnasJustificadas = new List<int>(new int[] { 2, 3, 4, 6, 7, 8, 9, 10, 11, 12, 13, 14, 24, 25, 26 });
+                List<int> ColumnasEditables = new List<int>(new int[] { 10, 11, 13, 14, 21, 25, 26 });
                 List<int> ColumnasEnfasis = new List<int>(new int[] { 6, 7, 8, 9, 12, 24 });
 
 
@@ -2000,6 +2040,8 @@ namespace ComisionesVentas
                 //oGrid.Columns.Item(11).BackColor = Funciones.Color_RGB_SAP(240, 255, 255);
                 //oGrid.Columns.Item(13).BackColor = Funciones.Color_RGB_SAP(240, 255, 255);
                 oGrid.Columns.Item(21).BackColor = Commons.Color_RGB_SAP(240, 255, 255);
+                oGrid.Columns.Item(25).BackColor = Commons.Color_RGB_SAP(240, 255, 255);
+                oGrid.Columns.Item(26).BackColor = Commons.Color_RGB_SAP(240, 255, 255);
 
                 for (int iRow = 0; iRow <= oGrid.Rows.Count - 1; iRow++)
                 {
@@ -2016,6 +2058,8 @@ namespace ComisionesVentas
                         decimal PreIni = Convert.ToDecimal(oGrid.DataTable.GetValue("Comi Premio Ini", iRow));
                         decimal ComAct = Convert.ToDecimal(oGrid.DataTable.GetValue("Comision Vta", iRow));
                         decimal ComIni = Convert.ToDecimal(oGrid.DataTable.GetValue("Comision Vta Ini", iRow));
+                        decimal ComActSC = Convert.ToDecimal(oGrid.DataTable.GetValue("Comision Vta SC", iRow));
+                        decimal ComIniSC = Convert.ToDecimal(oGrid.DataTable.GetValue("Comision VtaSC Ini", iRow));
                         string NuevaL = oGrid.DataTable.GetValue(19, iRow).ToString();
 
                         //Cambiar Color de Fuentes en Datos Modificados (10, 11, 13, 14)
@@ -2051,6 +2095,22 @@ namespace ComisionesVentas
                             GridExtensions.ColorFontCellGrid(oGrid, 14 + 1, iRow + 1, ColorF, ColorB);
                         }
 
+                        if (ComActSC != ComIniSC)
+                        {
+                            int ColorF = Commons.Color_RGB_SAP(255, 0, 0);
+                            int ColorB = Commons.Color_RGB_SAP(250, 250, 210);
+                            GridExtensions.ColorFontCellGrid(oGrid, 25 + 1, iRow + 1, ColorF, ColorB);
+                            GridExtensions.ColorFontCellGrid(oGrid, 26 + 1, iRow + 1, ColorF, ColorB);
+                        }
+                        else
+                        {
+                            int ColorF = Commons.Color_RGB_SAP(0, 0, 0);
+                            int ColorB = Convert.ToInt32(oGrid.DataTable.GetValue(20, iRow));
+                            ColorB = ColorB == 0 ? Commons.Color_RGB_SAP(240, 255, 255) : ColorB;
+                            GridExtensions.ColorFontCellGrid(oGrid, 25 + 1, iRow + 1, ColorF, ColorB);
+                            GridExtensions.ColorFontCellGrid(oGrid, 26 + 1, iRow + 1, ColorF, ColorB);
+                        }
+
                     }
                     catch (Exception)
                     {                    }
@@ -2063,6 +2123,8 @@ namespace ComisionesVentas
                 col = (SAPbouiCOM.EditTextColumn)oGrid.Columns.Item(11);
                 col.ColumnSetting.SumType = SAPbouiCOM.BoColumnSumType.bst_Auto;
                 col = (SAPbouiCOM.EditTextColumn)oGrid.Columns.Item(14);
+                col.ColumnSetting.SumType = SAPbouiCOM.BoColumnSumType.bst_Auto;
+                col = (SAPbouiCOM.EditTextColumn)oGrid.Columns.Item(26);
                 col.ColumnSetting.SumType = SAPbouiCOM.BoColumnSumType.bst_Auto;
 
             }
@@ -2169,7 +2231,11 @@ namespace ComisionesVentas
                                                                                         + oDT.GetValue(21, i).ToString().Replace("'", "''") + "','"
                                                                                         + oDT.GetValue(22, i) + "','"
                                                                                         + oDT.GetValue(23, i) + "',"
-                                                                                        + Convert.ToDecimal(oDT.GetValue(24, i)).ToString(nfi) + "";
+                                                                                        + Convert.ToDecimal(oDT.GetValue(24, i)).ToString(nfi) + ","
+                                                                                        + Convert.ToDecimal(oDT.GetValue(25, i)).ToString(nfi) + ","
+                                                                                        + Convert.ToDecimal(oDT.GetValue(26, i)).ToString(nfi) + ","
+                                                                                        + Convert.ToDecimal(oDT.GetValue(27, i)).ToString(nfi) + ","
+                                                                                        + Convert.ToDecimal(oDT.GetValue(28, i)).ToString(nfi) + "";
 
                     DT_SQL.ExecuteQuery(sql);
                 }
@@ -2357,7 +2423,11 @@ namespace ComisionesVentas
                                                                                         + oDT.GetValue(21, i).ToString().Replace("'", "''") + "','"
                                                                                         + oDT.GetValue(22, i) + "','"
                                                                                         + oDT.GetValue(23, i) + "',"
-                                                                                        + Convert.ToDecimal(oDT.GetValue(24, i)).ToString(nfi) + "";
+                                                                                        + Convert.ToDecimal(oDT.GetValue(24, i)).ToString(nfi) + ","
+                                                                                        + Convert.ToDecimal(oDT.GetValue(25, i)).ToString(nfi) + ","
+                                                                                        + Convert.ToDecimal(oDT.GetValue(26, i)).ToString(nfi) + ","
+                                                                                        + Convert.ToDecimal(oDT.GetValue(27, i)).ToString(nfi) + ","
+                                                                                        + Convert.ToDecimal(oDT.GetValue(28, i)).ToString(nfi) + "";
 
                     DT_SQL.ExecuteQuery(sql);
                 }
@@ -2381,7 +2451,7 @@ namespace ComisionesVentas
                 SAPbouiCOM.DataTable ooDTTableGRID = oForm.DataSources.DataTables.Item("DT_COM");
                 oDTTable = oForm.DataSources.DataTables.Item("DT_SQL");
 
-                string sql = "EXEC [Min_Comisiones_Calculo_PCV] " + nPCV + ", " + TipoFila + ", " + Vend;
+                string sql = "EXEC [Min_Comisiones_Calculo_PCV] " + nPCV + ", " + TipoFila + ", " + Vend + ",'" + oComboBox.Selected.Description + "'";
                 oDTTable.ExecuteQuery(sql);
                 decimal valor = Convert.ToDecimal(oDTTable.GetValue(23, oDTTable.Rows.Count - 1));
                 if (!oDTTable.IsEmpty)
@@ -2408,6 +2478,8 @@ namespace ComisionesVentas
 
                     oForm.Items.Item("Item_18").Enabled = true;
                     valor = Convert.ToDecimal(ooDTTableGRID.GetValue(23, ooDTTableGRID.Rows.Count - 1));
+
+                    oGrid.Rows.SelectedRows.Add(oGrid.DataTable.Rows.Count - 1);
                 }
                 else 
                 { 
@@ -2473,6 +2545,7 @@ namespace ComisionesVentas
 
                     oForm.Items.Item("Item_45").Enabled = true;
                     //valor = Convert.ToDecimal(ooDTTableGRID.GetValue(23, ooDTTableGRID.Rows.Count - 1));
+                    oGrid.Rows.SelectedRows.Add(oGrid.DataTable.Rows.Count - 1);
                 }
                 else
                 {
@@ -2527,13 +2600,13 @@ namespace ComisionesVentas
                     int ColorB = NuevaL.Trim() != "Y" ? Commons.Color_RGB_SAP(250, 250, 210) : Convert.ToInt32(oGrid.DataTable.GetValue(20, dtRow));
                     GridExtensions.ColorFontCellGrid(oGrid, 15 + 1, gridRow + 1, ColorF, ColorB);
                     oGrid.DataTable.SetValue("Vendedor", dtRow, NomVend);
-                    oGrid.DataTable.SetValue("Id Vend", dtRow, IdVend);
+                    oGrid.DataTable.SetValue("Id Vend", dtRow, IdVend == "" ? "0" : IdVend);
                 }
 
                 ((SAPbouiCOM.Button)oForm.Items.Item("Item_45").Specific).Item.Enabled = true;
 
             }
-            catch (Exception)
+            catch (Exception e)
             { }
             finally
             {  oForm.Freeze(false);            }
@@ -2582,6 +2655,10 @@ namespace ComisionesVentas
                     oForm.Items.Item("Item_56").Enabled = true;
 
                     Formatear_Grid_PagosPremios();
+
+                    oGrid.Rows.SelectedRows.Add(oGrid.DataTable.Rows.Count-1);
+
+                    Calcular_Totales_Pagos();
                 }
                 else
                 {
@@ -2664,6 +2741,10 @@ namespace ComisionesVentas
             Double Venta;
             Double Comision;
             String sValor;
+            Double sPorcCSC;
+            Double sComiSC;
+            int iHabiles = Convert.ToInt32(oForm.DataSources.UserDataSources.Item("UD_HAB").Value);
+            int iFeriados = Convert.ToInt32(oForm.DataSources.UserDataSources.Item("UD_FER").Value); 
 
             PorcDesc = Convert.ToDouble(oGrid.DataTable.GetValue("Porc Dscto", dtRow));
             PorComiBase = (1.6 - (1.6 * ((PorcDesc * 2) / 100)));
@@ -2689,6 +2770,28 @@ namespace ComisionesVentas
                     sValor = dValor.ToString(nfi);
                     oGrid.DataTable.SetValue("Porc Comi", dtRow, sValor);
                     break;
+
+                case "Porc Comi SC":
+                    Porc = (Convert.ToDouble(oGrid.DataTable.GetValue(ColUID, dtRow)));
+                    Porc = Porc == Math.Round(PorComiBase, 2) || AsignaBase == 1 ? PorComiBase : Porc;
+                    Venta = Convert.ToDouble(oGrid.DataTable.GetValue("Monto Vta Neta", dtRow));
+                    dValor = Math.Round((Venta * (Porc / 100)), 0);
+                    sValor = dValor.ToString(nfi);
+                    oGrid.DataTable.SetValue("Comision Vta SC", dtRow, sValor);
+                    if (AsignaBase == 1)
+                    {
+                        sValor = PorComiBase.ToString(nfi);
+                        oGrid.DataTable.SetValue("Porc Comi SC", dtRow, sValor);
+                    }
+                    break;
+                case "Comision Vta SC":
+                    Comision = Convert.ToDouble(oGrid.DataTable.GetValue(ColUID, dtRow));
+                    Venta = Convert.ToDouble(oGrid.DataTable.GetValue("Monto Vta Neta", dtRow));
+                    dValor = ((Comision * 100) / Venta);
+                    sValor = dValor.ToString(nfi);
+                    oGrid.DataTable.SetValue("Porc Comi SC", dtRow, sValor);
+                    break;
+
                 case "Porc Prem Com":
                     Porc = (Convert.ToDouble(oGrid.DataTable.GetValue(ColUID, dtRow)));
                     Venta = Convert.ToDouble(oGrid.DataTable.GetValue("Monto Vta Neta", dtRow));
@@ -2705,15 +2808,30 @@ namespace ComisionesVentas
                     break;
             }
 
+            //Comisiones Semana Corrida
+            if (ColUID == "Porc Comi"  || ColUID == "Comision Vta")
+            {
+                Venta = Convert.ToDouble(oGrid.DataTable.GetValue("Monto Vta Neta", dtRow));
+                Comision = Convert.ToDouble(oGrid.DataTable.GetValue("Comision Vta", dtRow));
+                sPorcCSC = ((Comision * iHabiles) / (iFeriados + iHabiles)) * 100 / Venta ; 
+                sComiSC = Math.Round((Comision * iHabiles) / (iFeriados + iHabiles),0);
+                sValor = sPorcCSC.ToString(nfi);
+                oGrid.DataTable.SetValue("Porc Comi SC", dtRow, sValor);
+                sValor = sComiSC.ToString(nfi);
+                oGrid.DataTable.SetValue("Comision Vta SC", dtRow, sValor);
+            }
+
             //Cambiar Colores GRID
             decimal PreAct = Convert.ToDecimal(oGrid.DataTable.GetValue("Comi Premio", dtRow));
             decimal PreIni = Convert.ToDecimal(oGrid.DataTable.GetValue("Comi Premio Ini", dtRow));
             decimal ComAct = Convert.ToDecimal(oGrid.DataTable.GetValue("Comision Vta", dtRow));
             decimal ComIni = Convert.ToDecimal(oGrid.DataTable.GetValue("Comision Vta Ini", dtRow));
+            decimal ComActSC = Convert.ToDecimal(oGrid.DataTable.GetValue("Comision Vta SC", dtRow));
+            decimal ComIniSC = Convert.ToDecimal(oGrid.DataTable.GetValue("Comision VtaSC Ini", dtRow));
             string NuevaL = oGrid.DataTable.GetValue(19, dtRow).ToString();
 
             //Cambiar Color de Linea
-            if ((PreAct == PreIni && ComAct == ComIni) && NuevaL.Trim() != "Y")
+            if ((PreAct == PreIni && ComAct == ComIni && ComActSC == ComIniSC) && NuevaL.Trim() != "Y")
             {
                 int Color = Commons.Color_RGB_SAP(255, 255, 255);
                 oGrid.DataTable.SetValue(20, dtRow, Color);
@@ -2761,7 +2879,24 @@ namespace ComisionesVentas
                 if (NuevaL.Trim() != "Y") oGrid.DataTable.SetValue(19, dtRow, "");
             }
 
-            if (PreAct != PreIni && ComAct != ComIni && NuevaL.Trim() != "Y")
+            if (ComActSC != ComIniSC)
+            {
+                int ColorF = Commons.Color_RGB_SAP(255, 0, 0);
+                int ColorB = Commons.Color_RGB_SAP(250, 250, 210);
+                GridExtensions.ColorFontCellGrid(oGrid, 25 + 1, dtRow + 1, ColorF, ColorB);
+                GridExtensions.ColorFontCellGrid(oGrid, 26 + 1, dtRow + 1, ColorF, ColorB);
+                if (NuevaL.Trim() != "Y") oGrid.DataTable.SetValue(19, dtRow, "MC");
+            }
+            else
+            {
+                int ColorF = Commons.Color_RGB_SAP(0, 0, 0);
+                int ColorB = NuevaL.Trim() != "Y" ? Commons.Color_RGB_SAP(240, 255, 255) : Convert.ToInt32(oGrid.DataTable.GetValue(20, dtRow));
+                GridExtensions.ColorFontCellGrid(oGrid, 25 + 1, dtRow + 1, ColorF, ColorB);
+                GridExtensions.ColorFontCellGrid(oGrid, 26 + 1, dtRow + 1, ColorF, ColorB);
+                if (NuevaL.Trim() != "Y") oGrid.DataTable.SetValue(19, dtRow, "");
+            }
+
+            if (PreAct != PreIni && ComAct != ComIni && ComActSC != ComIniSC  && NuevaL.Trim() != "Y")
             {
                 oGrid.DataTable.SetValue(19, dtRow, "MA");
             }
@@ -2814,6 +2949,7 @@ namespace ComisionesVentas
             {
                 oGrid = (SAPbouiCOM.Grid)oForm.Items.Item("Item_47").Specific;
                 SAPbouiCOM.DataTable DT_PAG = oForm.DataSources.DataTables.Item("DT_PAG");
+                SAPbouiCOM.DataTable DT_PREMI = oForm.DataSources.DataTables.Item("DT_PREMI");
                 SAPbouiCOM.DataTable DT_TOTPAG = oForm.DataSources.DataTables.Item("DT_TOTPAG");
                 SAPbouiCOM.DataTable DT_SQL = oForm.DataSources.DataTables.Item("DT_SQL");
                 //SAPbouiCOM.DataTable DT_SQL = oForm.DataSources.DataTables.Item("DT_SQL");
@@ -2822,6 +2958,7 @@ namespace ComisionesVentas
                 Double TotalNOAplican = 0.0;
                 Double TotalSinPCV = 0.0;
                 Double TotalPagComi = 0.0;
+                Double TotalApliComi = 0.0;
                 Int32 nProyectos = 0;
 
                 String sql = "select COUNT( DISTINCT Proyecto) as nProy from [@Z_COMI_PAGOS_TEMP] where ISNULL(Proyecto,'') != '' ";
@@ -2842,29 +2979,36 @@ namespace ComisionesVentas
                     //    nProyectos += sProyecto.Length > 0 ? 1 : 0; 
                 }
 
+                for (int i = 0; i < DT_PREMI.Rows.Count; i++)
+                {
+                    TotalApliComi += Convert.ToDouble(DT_PREMI.GetValue("Monto Pago Cliente", i));  
+                }
+
                 try
                 {
-                    DT_TOTPAG.Columns.Add("Cant. Proyectos", SAPbouiCOM.BoFieldsType.ft_AlphaNumeric);
+                    DT_TOTPAG.Columns.Add("Cant. Proyectos Pagos", SAPbouiCOM.BoFieldsType.ft_AlphaNumeric);
                     DT_TOTPAG.Columns.Add("Total Pagos", SAPbouiCOM.BoFieldsType.ft_AlphaNumeric);
-                    DT_TOTPAG.Columns.Add("Pagos No aplicables a Comision", SAPbouiCOM.BoFieldsType.ft_AlphaNumeric);
+                    DT_TOTPAG.Columns.Add("Pagos No aplicables a Premios", SAPbouiCOM.BoFieldsType.ft_AlphaNumeric);
                     DT_TOTPAG.Columns.Add("Pagos sin PCV Generada", SAPbouiCOM.BoFieldsType.ft_AlphaNumeric);
-                    DT_TOTPAG.Columns.Add("Total Pagos para Comision", SAPbouiCOM.BoFieldsType.ft_AlphaNumeric);
+                    DT_TOTPAG.Columns.Add("Total Pagos para Premios", SAPbouiCOM.BoFieldsType.ft_AlphaNumeric);
+                    DT_TOTPAG.Columns.Add("Total Pagos Aplicados a Premios", SAPbouiCOM.BoFieldsType.ft_AlphaNumeric);
                     DT_TOTPAG.Rows.Add();
                 }
                 catch (Exception) { }
 
-                DT_TOTPAG.SetValue("Cant. Proyectos", 0, string.Format("{0:N0}",nProyectos));
+                DT_TOTPAG.SetValue("Cant. Proyectos Pagos", 0, string.Format("{0:N0}",nProyectos));
                 DT_TOTPAG.SetValue("Total Pagos", 0, string.Format("{0:C0}", TotalPagos));
-                DT_TOTPAG.SetValue("Pagos No aplicables a Comision", 0, string.Format("{0:C0}", TotalNOAplican));
+                DT_TOTPAG.SetValue("Pagos No aplicables a Premios", 0, string.Format("{0:C0}", TotalNOAplican));
                 DT_TOTPAG.SetValue("Pagos sin PCV Generada", 0, string.Format("{0:C0}", TotalSinPCV));
-                DT_TOTPAG.SetValue("Total Pagos para Comision", 0, string.Format("{0:C0}", TotalPagComi));
+                DT_TOTPAG.SetValue("Total Pagos para Premios", 0, string.Format("{0:C0}", TotalPagComi));
+                DT_TOTPAG.SetValue("Total Pagos Aplicados a Premios", 0, string.Format("{0:C0}", TotalApliComi));
 
 
                 oGrid.CommonSetting.SetRowBackColor(1, Commons.Color_RGB_SAP(255, 255, 255)); ;
                 for (int i = 0; i < oGrid.Columns.Count; i++)
                 {
                     oGrid.Columns.Item(i).RightJustified = true;
-                    oGrid.Columns.Item(i).Width = 150;
+                    oGrid.Columns.Item(i).Width = 152;
                 }
 
                 SAPbouiCOM.RowHeaders oHeader = oGrid.RowHeaders;
@@ -2988,6 +3132,9 @@ namespace ComisionesVentas
         private SAPbouiCOM.Button Button6;
         private SAPbouiCOM.EditText EditText6;
         private SAPbouiCOM.Folder Folder9;
-
+        private SAPbouiCOM.StaticText StaticText13;
+        private SAPbouiCOM.EditText EditText7;
+        private SAPbouiCOM.StaticText StaticText16;
+        private SAPbouiCOM.EditText EditText8;
     }
 }
