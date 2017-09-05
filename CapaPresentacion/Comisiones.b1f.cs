@@ -1805,9 +1805,9 @@ namespace ComisionesVentas
                 //Grid0.Columns.Item(5).Width = 200;
                 //Grid0.Columns.Item(14).Width = 200;
 
-                List<int> ColumnasJustificadas = new List<int>(new int[] { 2, 4, 5, 6, 7, 8, 9 ,11 });
-                List<int> ColumnasEditables = new List<int>(new int[] { 5, 6, 8, 9, 10, 15 });
-                List<int> ColumnasEnfasis = new List<int>(new int[] { 2, 4, 7, 13 });
+                List<int> ColumnasJustificadas = new List<int>(new int[] { 2, 4, 5, 6, 7, 8, 9, 10 ,12 });
+                List<int> ColumnasEditables = new List<int>(new int[] { 5, 6, 9, 10, 11, 16 });
+                List<int> ColumnasEnfasis = new List<int>(new int[] { 2, 4, 7, 8, 14 });
 
                 oGrid.Columns.Item(0).TitleObject.Sortable = true;
                 oGrid.Columns.Item(2).TitleObject.Sortable = true;
@@ -1860,6 +1860,8 @@ namespace ComisionesVentas
                 col = (SAPbouiCOM.EditTextColumn)oGrid.Columns.Item(8);
                 col.ColumnSetting.SumType = SAPbouiCOM.BoColumnSumType.bst_Auto;
                 col = (SAPbouiCOM.EditTextColumn)oGrid.Columns.Item(9);
+                col.ColumnSetting.SumType = SAPbouiCOM.BoColumnSumType.bst_Auto;
+                col = (SAPbouiCOM.EditTextColumn)oGrid.Columns.Item(10);
                 col.ColumnSetting.SumType = SAPbouiCOM.BoColumnSumType.bst_Auto;
             }
             catch { }
@@ -2025,11 +2027,13 @@ namespace ComisionesVentas
                 oGrid.Columns.Item(20).Visible = false;
                 oGrid.Columns.Item(22).Visible = false;
                 oGrid.Columns.Item(23).Visible = false;
+                oGrid.Columns.Item(27).Visible = false;
+                oGrid.Columns.Item(28).Visible = false;
                 //Grid0.Columns.Item(14).Width = 200;
 
                 List<int> ColumnasJustificadas = new List<int>(new int[] { 2, 3, 4, 6, 7, 8, 9, 10, 11, 12, 13, 14, 24, 25, 26 });
-                List<int> ColumnasEditables = new List<int>(new int[] { 10, 11, 13, 14, 21 });
-                List<int> ColumnasEnfasis = new List<int>(new int[] { 6, 7, 8, 9, 12, 24, 25, 26 });
+                List<int> ColumnasEditables = new List<int>(new int[] { 10, 11, 13, 14, 21, 25, 26 });
+                List<int> ColumnasEnfasis = new List<int>(new int[] { 6, 7, 8, 9, 12, 24 });
 
 
                 for (int iCols = 0; iCols <= oGrid.Columns.Count - 1; iCols++)
@@ -2055,6 +2059,8 @@ namespace ComisionesVentas
                 //oGrid.Columns.Item(11).BackColor = Funciones.Color_RGB_SAP(240, 255, 255);
                 //oGrid.Columns.Item(13).BackColor = Funciones.Color_RGB_SAP(240, 255, 255);
                 oGrid.Columns.Item(21).BackColor = Commons.Color_RGB_SAP(240, 255, 255);
+                oGrid.Columns.Item(25).BackColor = Commons.Color_RGB_SAP(240, 255, 255);
+                oGrid.Columns.Item(26).BackColor = Commons.Color_RGB_SAP(240, 255, 255);
 
                 for (int iRow = 0; iRow <= oGrid.Rows.Count - 1; iRow++)
                 {
@@ -2071,6 +2077,8 @@ namespace ComisionesVentas
                         decimal PreIni = Convert.ToDecimal(oGrid.DataTable.GetValue("Comi Premio Ini", iRow));
                         decimal ComAct = Convert.ToDecimal(oGrid.DataTable.GetValue("Comision Vta", iRow));
                         decimal ComIni = Convert.ToDecimal(oGrid.DataTable.GetValue("Comision Vta Ini", iRow));
+                        decimal ComActSC = Convert.ToDecimal(oGrid.DataTable.GetValue("Comision Vta SC", iRow));
+                        decimal ComIniSC = Convert.ToDecimal(oGrid.DataTable.GetValue("Comision VtaSC Ini", iRow));
                         string NuevaL = oGrid.DataTable.GetValue(19, iRow).ToString();
 
                         //Cambiar Color de Fuentes en Datos Modificados (10, 11, 13, 14)
@@ -2106,9 +2114,25 @@ namespace ComisionesVentas
                             GridExtensions.ColorFontCellGrid(oGrid, 14 + 1, iRow + 1, ColorF, ColorB);
                         }
 
+                        if (ComActSC != ComIniSC)
+                        {
+                            int ColorF = Commons.Color_RGB_SAP(255, 0, 0);
+                            int ColorB = Commons.Color_RGB_SAP(250, 250, 210);
+                            GridExtensions.ColorFontCellGrid(oGrid, 25 + 1, iRow + 1, ColorF, ColorB);
+                            GridExtensions.ColorFontCellGrid(oGrid, 26 + 1, iRow + 1, ColorF, ColorB);
+                        }
+                        else
+                        {
+                            int ColorF = Commons.Color_RGB_SAP(0, 0, 0);
+                            int ColorB = Convert.ToInt32(oGrid.DataTable.GetValue(20, iRow));
+                            ColorB = ColorB == 0 ? Commons.Color_RGB_SAP(240, 255, 255) : ColorB;
+                            GridExtensions.ColorFontCellGrid(oGrid, 25 + 1, iRow + 1, ColorF, ColorB);
+                            GridExtensions.ColorFontCellGrid(oGrid, 26 + 1, iRow + 1, ColorF, ColorB);
+                        }
+
                     }
                     catch (Exception)
-                    {                    }
+                    { }
                 }
 
                 SAPbouiCOM.EditTextColumn col = (SAPbouiCOM.EditTextColumn)oGrid.Columns.Item(6);
@@ -2124,7 +2148,7 @@ namespace ComisionesVentas
 
             }
             catch (Exception)
-            {            }
+            { }
         }
         private void Insertar_Pagos(SAPbouiCOM.DataTable oDT)
         {
@@ -2268,23 +2292,24 @@ namespace ComisionesVentas
                                                                                           + Convert.ToDecimal(oDT.GetValue(4, i)).ToString(nfi) + ","
                                                                                           + Convert.ToDecimal(oDT.GetValue(5, i)).ToString(nfi) + ","
                                                                                           + Convert.ToDecimal(oDT.GetValue(6, i)).ToString(nfi) + ","
-                                                                                          + Convert.ToDecimal(oDT.GetValue(7, i)).ToString(nfi) + ","
                                                                                           + Convert.ToDecimal(oDT.GetValue(8, i)).ToString(nfi) + ","
-                                                                                          + Convert.ToDecimal(oDT.GetValue(9, i)).ToString(nfi) + ",'"
-                                                                                          + oDT.GetValue(11, i) + "','"
+                                                                                          + Convert.ToDecimal(oDT.GetValue(9, i)).ToString(nfi) + ","
+                                                                                          + Convert.ToDecimal(oDT.GetValue(10, i)).ToString(nfi) + ",'"
                                                                                           + oDT.GetValue(12, i) + "','"
                                                                                           + oDT.GetValue(13, i) + "','"
+                                                                                          + oDT.GetValue(14, i) + "','"
                                                                                           + NConexion.sCodUsuActual + "','"
                                                                                           + FechaHoraAct.ToString("yyyy-MM-dd HH:mm:ss") + "','"
                                                                                           + ComboBox0.Selected.Description + "','"
-                                                                                          + oDT.GetValue(14, i) + "','"
                                                                                           + oDT.GetValue(15, i) + "','"
-                                                                                          + oDT.GetValue(19, i) + "','"
-                                                                                          + oDT.GetValue(20, i) + "','"
-                                                                                          + oDT.GetValue(21, i) + "',"
-                                                                                          + Convert.ToDecimal(oDT.GetValue(22, i)).ToString(nfi) + ","
-                                                                                          + Convert.ToDecimal(oDT.GetValue(23, i)).ToString(nfi) + ",'"
-                                                                                          + oDT.GetValue(10, i) + "'";
+                                                                                          + oDT.GetValue(16, i) + "','"
+                                                                                          + oDT.GetValue(17, i) + "','"
+                                                                                          + oDT.GetValue(21, i) + "','"
+                                                                                          + oDT.GetValue(22, i) + "',"
+                                                                                          + Convert.ToDecimal(oDT.GetValue(23, i)).ToString(nfi) + ","
+                                                                                          + Convert.ToDecimal(oDT.GetValue(24, i)).ToString(nfi) + ",'"
+                                                                                          + oDT.GetValue(11, i) + "',"
+                                                                                          + Convert.ToDecimal(oDT.GetValue(7, i)).ToString(nfi) + "";
 
                     DT_SQL.ExecuteQuery(sql);
                 }
@@ -2418,12 +2443,16 @@ namespace ComisionesVentas
                                                                                         + oDT.GetValue(21, i).ToString().Replace("'", "''") + "','"
                                                                                         + oDT.GetValue(22, i) + "','"
                                                                                         + oDT.GetValue(23, i) + "',"
-                                                                                        + Convert.ToDecimal(oDT.GetValue(24, i)).ToString(nfi) + "";
+                                                                                        + Convert.ToDecimal(oDT.GetValue(24, i)).ToString(nfi) + ","
+                                                                                        + Convert.ToDecimal(oDT.GetValue(25, i)).ToString(nfi) + ","
+                                                                                        + Convert.ToDecimal(oDT.GetValue(26, i)).ToString(nfi) + ","
+                                                                                        + Convert.ToDecimal(oDT.GetValue(27, i)).ToString(nfi) + ","
+                                                                                        + Convert.ToDecimal(oDT.GetValue(28, i)).ToString(nfi) + "";
 
                     DT_SQL.ExecuteQuery(sql);
                 }
                 catch (Exception)
-                {                }
+                { }
             }
 
         }
@@ -2620,7 +2649,7 @@ namespace ComisionesVentas
                 string sql = "SET NOCOUNT ON;SET FMTONLY OFF;EXEC [SBO_COMERCIAL].[dbo].[Min_Comisiones_Calculo_PCV] 0,1";
                 oDTTable.ExecuteQuery(sql);
 
-                sql = "EXEC [dbo].[Min_Comisiones_Pagos_Premios_Individual] " + sProyecto;
+                sql = "EXEC [dbo].[Min_Comisiones_Pagos_Premios_Individual] '" + sProyecto + "','" + NPeriodo.NombrePeriodo + "'";
                 oDTTable.ExecuteQuery(sql);
                 //decimal valor = Convert.ToDecimal(oDTTable.GetValue(23, oDTTable.Rows.Count - 1));
                 if (!oDTTable.IsEmpty)
@@ -2728,7 +2757,7 @@ namespace ComisionesVentas
             finally
             { oForm.Freeze(false); }
         }
-        private static void Calcular_Valor_Comision(string ColUID, int dtRow, int AsignaBase )
+        private static void Calcular_Valor_Comision(string ColUID, int dtRow, int AsignaBase)
         {
             oGrid = (SAPbouiCOM.Grid)oForm.Items.Item("Item_14").Specific;
 
@@ -2745,10 +2774,14 @@ namespace ComisionesVentas
             Double sPorcCSC;
             Double sComiSC;
             int iHabiles = Convert.ToInt32(oForm.DataSources.UserDataSources.Item("UD_HAB").Value);
-            int iFeriados = Convert.ToInt32(oForm.DataSources.UserDataSources.Item("UD_FER").Value); 
+            int iFeriados = Convert.ToInt32(oForm.DataSources.UserDataSources.Item("UD_FER").Value);
+            DateTime FecPCV = Convert.ToDateTime(oGrid.DataTable.GetValue("Fec Creacion", dtRow));
 
             PorcDesc = Convert.ToDouble(oGrid.DataTable.GetValue("Porc Dscto", dtRow));
             PorComiBase = (1.6 - (1.6 * ((PorcDesc * 2) / 100)));
+
+            bool PCVenPeriodo = FecPCV >= NPeriodo.FechaInicio && FecPCV <= NPeriodo.FechaFin ? true : false;
+
             switch (ColUID)
             {
                 case "Porc Comi":
@@ -2771,6 +2804,33 @@ namespace ComisionesVentas
                     sValor = dValor.ToString(nfi);
                     oGrid.DataTable.SetValue("Porc Comi", dtRow, sValor);
                     break;
+
+                case "Porc Comi SC":
+                    if (PCVenPeriodo)
+                    {
+                        Porc = (Convert.ToDouble(oGrid.DataTable.GetValue(ColUID, dtRow)));
+                        Porc = Porc == Math.Round(PorComiBase, 2) || AsignaBase == 1 ? PorComiBase : Porc;
+                        Venta = Convert.ToDouble(oGrid.DataTable.GetValue("Monto Vta Neta", dtRow));
+                        dValor = Math.Round((Venta * (Porc / 100)), 0);
+                        sValor = dValor.ToString(nfi);
+                        oGrid.DataTable.SetValue("Comision Vta SC", dtRow, sValor);
+                        if (AsignaBase == 1)
+                        {
+                            sValor = PorComiBase.ToString(nfi);
+                            oGrid.DataTable.SetValue("Porc Comi SC", dtRow, sValor);
+                        }
+                    }
+                    break;
+                case "Comision Vta SC":
+                    if (PCVenPeriodo)
+                    {
+                        Comision = Convert.ToDouble(oGrid.DataTable.GetValue(ColUID, dtRow));
+                        Venta = Convert.ToDouble(oGrid.DataTable.GetValue("Monto Vta Neta", dtRow));
+                        dValor = ((Comision * 100) / Venta);
+                        sValor = dValor.ToString(nfi);
+                        oGrid.DataTable.SetValue("Porc Comi SC", dtRow, sValor);
+                    }
+                    break;
                 case "Porc Prem Com":
                     Porc = (Convert.ToDouble(oGrid.DataTable.GetValue(ColUID, dtRow)));
                     Venta = Convert.ToDouble(oGrid.DataTable.GetValue("Monto Vta Neta", dtRow));
@@ -2788,12 +2848,12 @@ namespace ComisionesVentas
             }
 
             //Comisiones Semana Corrida
-            if (ColUID == "Porc Comi"  || ColUID == "Comision Vta")
+            if (ColUID == "Porc Comi" || ColUID == "Comision Vta")
             {
                 Venta = Convert.ToDouble(oGrid.DataTable.GetValue("Monto Vta Neta", dtRow));
                 Comision = Convert.ToDouble(oGrid.DataTable.GetValue("Comision Vta", dtRow));
-                sPorcCSC = ((Comision * iHabiles) / (iFeriados + iHabiles)) * 100 / Venta ; 
-                sComiSC = Math.Round((Comision * iHabiles) / (iFeriados + iHabiles),0);
+                sPorcCSC = ((Comision * iHabiles) / (iFeriados + iHabiles)) * 100 / Venta;
+                sComiSC = Math.Round((Comision * iHabiles) / (iFeriados + iHabiles), 0);
                 sValor = sPorcCSC.ToString(nfi);
                 oGrid.DataTable.SetValue("Porc Comi SC", dtRow, sValor);
                 sValor = sComiSC.ToString(nfi);
@@ -2805,10 +2865,12 @@ namespace ComisionesVentas
             decimal PreIni = Convert.ToDecimal(oGrid.DataTable.GetValue("Comi Premio Ini", dtRow));
             decimal ComAct = Convert.ToDecimal(oGrid.DataTable.GetValue("Comision Vta", dtRow));
             decimal ComIni = Convert.ToDecimal(oGrid.DataTable.GetValue("Comision Vta Ini", dtRow));
+            decimal ComActSC = Convert.ToDecimal(oGrid.DataTable.GetValue("Comision Vta SC", dtRow));
+            decimal ComIniSC = Convert.ToDecimal(oGrid.DataTable.GetValue("Comision VtaSC Ini", dtRow));
             string NuevaL = oGrid.DataTable.GetValue(19, dtRow).ToString();
 
             //Cambiar Color de Linea
-            if ((PreAct == PreIni && ComAct == ComIni) && NuevaL.Trim() != "Y")
+            if ((PreAct == PreIni && ComAct == ComIni && ComActSC == ComIniSC) && NuevaL.Trim() != "Y")
             {
                 int Color = Commons.Color_RGB_SAP(255, 255, 255);
                 oGrid.DataTable.SetValue(20, dtRow, Color);
@@ -2856,11 +2918,29 @@ namespace ComisionesVentas
                 if (NuevaL.Trim() != "Y") oGrid.DataTable.SetValue(19, dtRow, "");
             }
 
-            if (PreAct != PreIni && ComAct != ComIni && NuevaL.Trim() != "Y")
+            if (ComActSC != ComIniSC)
+            {
+                int ColorF = Commons.Color_RGB_SAP(255, 0, 0);
+                int ColorB = Commons.Color_RGB_SAP(250, 250, 210);
+                GridExtensions.ColorFontCellGrid(oGrid, 25 + 1, dtRow + 1, ColorF, ColorB);
+                GridExtensions.ColorFontCellGrid(oGrid, 26 + 1, dtRow + 1, ColorF, ColorB);
+                if (NuevaL.Trim() != "Y") oGrid.DataTable.SetValue(19, dtRow, "MC");
+            }
+            else
+            {
+                int ColorF = Commons.Color_RGB_SAP(0, 0, 0);
+                int ColorB = NuevaL.Trim() != "Y" ? Commons.Color_RGB_SAP(240, 255, 255) : Convert.ToInt32(oGrid.DataTable.GetValue(20, dtRow));
+                GridExtensions.ColorFontCellGrid(oGrid, 25 + 1, dtRow + 1, ColorF, ColorB);
+                GridExtensions.ColorFontCellGrid(oGrid, 26 + 1, dtRow + 1, ColorF, ColorB);
+                if (NuevaL.Trim() != "Y") oGrid.DataTable.SetValue(19, dtRow, "");
+            }
+
+            if (PreAct != PreIni && ComAct != ComIni && ComActSC != ComIniSC && NuevaL.Trim() != "Y")
             {
                 oGrid.DataTable.SetValue(19, dtRow, "MA");
             }
         }
+
         private void Calcular_Valor_Premios(string colUID, int dtRow, int v)
         {
             oGrid = (SAPbouiCOM.Grid)oForm.Items.Item("Item_35").Specific;
@@ -2987,19 +3067,19 @@ namespace ComisionesVentas
             try
             {
 
-                decimal PremAct = Convert.ToDecimal(oGrid.DataTable.GetValue(9, oGrid.GetDataTableRowIndex(dtRow)));
+                decimal PremAct = Convert.ToDecimal(oGrid.DataTable.GetValue(10, oGrid.GetDataTableRowIndex(dtRow)));
                 decimal PremIni = Convert.ToDecimal(oGrid.DataTable.GetValue("Premio Cobrado Ini", oGrid.GetDataTableRowIndex(dtRow)));
-                decimal PagAct = Convert.ToDecimal(oGrid.DataTable.GetValue(8, oGrid.GetDataTableRowIndex(dtRow)));
+                decimal PagAct = Convert.ToDecimal(oGrid.DataTable.GetValue(9, oGrid.GetDataTableRowIndex(dtRow)));
                 decimal PagIni = Convert.ToDecimal(oGrid.DataTable.GetValue("Monto Cobrado Ini", oGrid.GetDataTableRowIndex(dtRow)));
 
-                //Cambiar Color de Fuentes en Datos Modificados (5, 6, 9)
+                //Cambiar Color de Fuentes en Datos Modificados (5, 6, 10)
                 if (PremAct != PremIni)
                 {
                     int ColorF = Commons.Color_RGB_SAP(255, 0, 0);
                     int ColorB = Commons.Color_RGB_SAP(250, 250, 210);
                     GridExtensions.ColorFontCellGrid(oGrid, 5 + 1, dtRow + 1, ColorF, ColorB);
                     GridExtensions.ColorFontCellGrid(oGrid, 6 + 1, dtRow + 1, ColorF, ColorB);
-                    GridExtensions.ColorFontCellGrid(oGrid, 9 + 1, dtRow + 1, ColorF, ColorB);
+                    GridExtensions.ColorFontCellGrid(oGrid, 10 + 1, dtRow + 1, ColorF, ColorB);
                 }
                 else 
                 {
@@ -3008,22 +3088,22 @@ namespace ComisionesVentas
                     //NuevaL.Trim() != "Y" ? Commons.Color_RGB_SAP(240, 255, 255) : Convert.ToInt32(Grid4.DataTable.GetValue(20, dtRow));
                     GridExtensions.ColorFontCellGrid(oGrid, 5 + 1, dtRow + 1, ColorF, ColorB);
                     GridExtensions.ColorFontCellGrid(oGrid, 6 + 1, dtRow + 1, ColorF, ColorB);
-                    GridExtensions.ColorFontCellGrid(oGrid, 9 + 1, dtRow + 1, ColorF, ColorB);
+                    GridExtensions.ColorFontCellGrid(oGrid, 10 + 1, dtRow + 1, ColorF, ColorB);
                 }
 
-                //Cambiar Color de Fuentes en Datos Modificados (8)
+                //Cambiar Color de Fuentes en Datos Modificados (9)
                 if (PagAct != PagIni)
                 {
                     int ColorF = Commons.Color_RGB_SAP(255, 0, 0);
                     int ColorB = Commons.Color_RGB_SAP(250, 250, 210);
-                    GridExtensions.ColorFontCellGrid(oGrid, 8 + 1, dtRow + 1, ColorF, ColorB);
+                    GridExtensions.ColorFontCellGrid(oGrid, 9 + 1, dtRow + 1, ColorF, ColorB);
                 }
                 else
                 {
                     int ColorF = Commons.Color_RGB_SAP(0, 0, 0);
                     int ColorB = Commons.Color_RGB_SAP(240, 255, 255);
                     //NuevaL.Trim() != "Y" ? Commons.Color_RGB_SAP(240, 255, 255) : Convert.ToInt32(Grid4.DataTable.GetValue(20, dtRow));
-                    GridExtensions.ColorFontCellGrid(oGrid, 8 + 1, dtRow + 1, ColorF, ColorB);
+                    GridExtensions.ColorFontCellGrid(oGrid, 9 + 1, dtRow + 1, ColorF, ColorB);
                 }
 
             }
