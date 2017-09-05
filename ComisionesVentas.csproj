@@ -85,9 +85,6 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="FuncionalidadesSDKB1">
-      <HintPath>..\FuncionalidadesSDKB1\bin\Debug\FuncionalidadesSDKB1.dll</HintPath>
-    </Reference>
     <Reference Include="Microsoft.Office.Interop.Excel, Version=12.0.0.0, Culture=neutral, PublicKeyToken=71e9bce111e9429c">
       <EmbedInteropTypes>True</EmbedInteropTypes>
     </Reference>
@@ -105,6 +102,7 @@
   <ItemGroup>
     <Compile Include="CapaDatos\DConexion.cs" />
     <Compile Include="CapaNegocios\NConexion.cs" />
+    <Compile Include="CapaNegocios\NPeriodo.cs" />
     <Compile Include="CapaPresentacion\BuscaPago.b1f.cs">
       <DependentUpon>BuscaPago.b1f</DependentUpon>
     </Compile>
@@ -160,7 +158,12 @@
       <FormCategory>UserForm</FormCategory>
     </None>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="..\FuncionalidadesSDKB1\FuncionalidadesSDKB1.csproj">
+      <Project>{5c5a41bd-b5ef-4b81-acd7-ada1fea1148e}</Project>
+      <Name>FuncionalidadesSDKB1</Name>
+    </ProjectReference>
+  </ItemGroup>
   <ItemGroup>
     <COMReference Include="Microsoft.Office.Interop.Access.Dao">
       <Guid>{4AC9E1DA-5BAD-4AC7-86E3-24F4CDCECA28}</Guid>

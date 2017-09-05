@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using SAPbouiCOM.Framework;
+using ComisionesVentas.CapaNegocios;
 
 namespace ComisionesVentas.CapaPresentacion
 {
@@ -65,13 +66,57 @@ namespace ComisionesVentas.CapaPresentacion
                 DT_SQL.ExecuteQuery(sql);
                 oForm.ReportType = "Modal";
             }
-            catch (Exception) {}
+            catch (Exception) { }
         }
 
         private void Form_ResizeAfter(SAPbouiCOM.SBOItemEventArg pVal)
         {
             oUDS = oForm.DataSources.UserDataSources.Item("UD_1");
             sOrigf = oUDS.ValueEx;
+            string sql;
+            switch (sOrigf)
+            {
+                case "ComisionesA":
+                    oForm.Title = "Agregar Vendedor a Comisiones";
+                    sql = @"SELECT 
+	                            SlpCode as 'Codigo'
+	                            ,Memo  as 'Inicial' 
+	                            ,SlpName as 'Nombre'
+                            FROM 
+	                            OSLP 
+                            WHERE 
+	                            Active = 'Y'
+	                            AND SlpCode != -1
+                                AND SlpCode NOT IN ( SELECT DISTINCT V.SlpCode 
+                                                        FROM OSLP V join [@Z_COMI_VEND] P ON V.SlpCode = P.[Id Vend]
+                                                        WHERE V.Active  = 'Y' 
+                                                            AND V.SlpCode != -1  
+                                                            AND Periodo = '" + NPeriodo.NombrePeriodo + @"') 
+                            ORDER BY
+	                            1";
+                    DT_SQL.ExecuteQuery(sql);
+                    break;
+                case "ComisionesR":
+                    oForm.Title = "Agregar Vendedor a Comisiones";
+                    sql = @"SELECT 
+	                            SlpCode as 'Codigo'
+	                            ,Memo  as 'Inicial' 
+	                            ,SlpName as 'Nombre'
+                            FROM 
+	                            OSLP 
+                            WHERE 
+	                            Active = 'Y'
+	                            AND SlpCode != -1
+                                AND SlpCode NOT IN ( SELECT DISTINCT V.SlpCode 
+                                                        FROM OSLP V join ORDR P ON V.SlpCode = P.SlpCode
+                                                        WHERE V.Active  = 'Y' AND V.SlpCode != -1 AND series = 27
+                                                        AND P.CreateDate BETWEEN  '" + NPeriodo.FechaInicio.ToString("MM-dd-yyyy") + 
+                                                                     @"' AND '" + NPeriodo.FechaFin.ToString("MM-dd-yyyy") + @"') 
+                            ORDER BY
+	                            1";
+                    DT_SQL.ExecuteQuery(sql);
+                    break;
+            }
         }
 
         private void Grid0_ClickAfter(object sboObject, SAPbouiCOM.SBOItemEventArg pVal)
@@ -102,20 +147,27 @@ namespace ComisionesVentas.CapaPresentacion
         {
             if (Grid0.Rows.SelectedRows.Count > 0)
             {
-                
-                oUDS = oForm.DataSources.UserDataSources.Item("UD_0");
-                string sVend = Convert.ToString(Grid0.DataTable.GetValue(0, Grid0.Rows.SelectedRows.Item(0, SAPbouiCOM.BoOrderType.ot_RowOrder)));
 
+                oUDS = oForm.DataSources.UserDataSources.Item("UD_0");
+                int nRow = Grid0.Rows.SelectedRows.Item(0, SAPbouiCOM.BoOrderType.ot_RowOrder);
+                string[] sVend = new string[2];
+                sVend[0] = Convert.ToString(Grid0.DataTable.GetValue(0, nRow));
+                sVend[1] = "(" + Convert.ToString(Grid0.DataTable.GetValue(1, nRow)) + ") - " 
+                            + Convert.ToString(Grid0.DataTable.GetValue(2, nRow));
                 SAPbouiCOM.Form oFormP = Application.SBO_Application.Forms.Item(oUDS.ValueEx);
                 oForm.Close();
 
                 switch (sOrigf)
                 {
                     case "Pagos":
-                        Comisiones.Asigna_Vendedor_Grid_Pagos(sVend);
+                        Comisiones.Asigna_Vendedor_Grid_Pagos(sVend[0]);
                         break;
                     case "Premios":
-                        Comisiones.Asigna_Vendedor_Grid_Premios(sVend);
+                        Comisiones.Asigna_Vendedor_Grid_Premios(sVend[0]);
+                        break;
+                    case "ComisionesA":
+                    case "ComisionesR":
+                        Comisiones.Agregar_Vendedor_Comisiones_Periodo(sVend);
                         break;
 
                 }
