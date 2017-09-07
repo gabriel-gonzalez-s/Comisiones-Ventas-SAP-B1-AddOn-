@@ -113,7 +113,7 @@ namespace ComisionesVentas
                 }
 
             }
-            catch (Exception e)
+            catch (Exception )
             {
             }
 
@@ -138,7 +138,7 @@ namespace ComisionesVentas
                         break;
                 }
             }
-            catch (Exception e)
+            catch (Exception)
             {
             }
 
