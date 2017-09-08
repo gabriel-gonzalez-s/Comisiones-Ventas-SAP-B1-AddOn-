@@ -1681,7 +1681,7 @@ namespace ComisionesVentas
                 GridExtensions.RowNumberGrid(Grid2);
 
             }
-            catch (Exception )
+            catch (Exception)
             { }
             finally
             { oForm.Freeze(false); }
@@ -2335,7 +2335,7 @@ namespace ComisionesVentas
 
                     DT_SQL.ExecuteQuery(sql);
                 }
-                catch (Exception )
+                catch (Exception)
                 {
                     Sucess = false;
                     if (AplicarReverso) // Desmarca los registro que estaba señalados para borrar y Elimina los registros nuevos recien insertados
@@ -2648,7 +2648,7 @@ namespace ComisionesVentas
                 ((SAPbouiCOM.Button)oForm.Items.Item("Item_45").Specific).Item.Enabled = true;
 
             }
-            catch (Exception )
+            catch (Exception)
             { }
             finally
             { oForm.Freeze(false); }
@@ -3203,7 +3203,7 @@ namespace ComisionesVentas
                 oForm.DataSources.DataTables.Item("DT_CSPR").CopyFrom(DT_SQL);
                 oGrid = (SAPbouiCOM.Grid)oForm.Items.Item("Item_64").Specific;
 
-                List<int> ColumnasJustificadas = new List<int>(new int[] { 5, 6, 7, 8, 9, 10 });
+                List<int> ColumnasJustificadas = new List<int>(new int[] { 5, 6, 7, 8, 9, 10, 11, 12, 13, 14 });
                 //List<int> ColumnasEditables = new List<int>(new int[] { 5, 6, 9, 10, 11, 16 });
                 //List<int> ColumnasEnfasis = new List<int>(new int[] { 2, 4, 7, 8, 14 });
 
@@ -3218,20 +3218,26 @@ namespace ComisionesVentas
                         oGrid.Columns.Item(iCols).RightJustified = true;
                 }
 
-                SAPbouiCOM.EditTextColumn col = (SAPbouiCOM.EditTextColumn)oGrid.Columns.Item(5);
-                col.ColumnSetting.SumType = SAPbouiCOM.BoColumnSumType.bst_Auto;
-                col = (SAPbouiCOM.EditTextColumn)oGrid.Columns.Item(6);
-                col.ColumnSetting.SumType = SAPbouiCOM.BoColumnSumType.bst_Auto;
-                col = (SAPbouiCOM.EditTextColumn)oGrid.Columns.Item(7);
-                col.ColumnSetting.SumType = SAPbouiCOM.BoColumnSumType.bst_Auto;
-                col = (SAPbouiCOM.EditTextColumn)oGrid.Columns.Item(8);
-                col.ColumnSetting.SumType = SAPbouiCOM.BoColumnSumType.bst_Auto;
-                col = (SAPbouiCOM.EditTextColumn)oGrid.Columns.Item(9);
-                col.ColumnSetting.SumType = SAPbouiCOM.BoColumnSumType.bst_Auto;
-                col = (SAPbouiCOM.EditTextColumn)oGrid.Columns.Item(10);
-                col.ColumnSetting.SumType = SAPbouiCOM.BoColumnSumType.bst_Auto;
+                SAPbouiCOM.EditTextColumn col = (SAPbouiCOM.EditTextColumn)oGrid.Columns.Item(1);
+                //col.ColumnSetting.SumType = SAPbouiCOM.BoColumnSumType.bst_Auto;
 
-                StaticText19.Caption = "Total Registros = " + oGrid.Rows.Count.ToString() ;
+                for (int i = 5; i <= 14; i++)
+                {
+                    col = (SAPbouiCOM.EditTextColumn)oGrid.Columns.Item(i);
+                    col.ColumnSetting.SumType = SAPbouiCOM.BoColumnSumType.bst_Auto;
+                }
+                //col = (SAPbouiCOM.EditTextColumn)oGrid.Columns.Item(6);
+                //col.ColumnSetting.SumType = SAPbouiCOM.BoColumnSumType.bst_Auto;
+                //col = (SAPbouiCOM.EditTextColumn)oGrid.Columns.Item(7);
+                //col.ColumnSetting.SumType = SAPbouiCOM.BoColumnSumType.bst_Auto;
+                //col = (SAPbouiCOM.EditTextColumn)oGrid.Columns.Item(8);
+                //col.ColumnSetting.SumType = SAPbouiCOM.BoColumnSumType.bst_Auto;
+                //col = (SAPbouiCOM.EditTextColumn)oGrid.Columns.Item(9);
+                //col.ColumnSetting.SumType = SAPbouiCOM.BoColumnSumType.bst_Auto;
+                //col = (SAPbouiCOM.EditTextColumn)oGrid.Columns.Item(10);
+                //col.ColumnSetting.SumType = SAPbouiCOM.BoColumnSumType.bst_Auto;
+
+                StaticText19.Caption = "Total Registros = " + oGrid.Rows.Count.ToString();
 
             }
             catch (Exception) { }
@@ -3257,15 +3263,33 @@ namespace ComisionesVentas
 
         private void Folder5_ClickAfter(object sboObject, SAPbouiCOM.SBOItemEventArg pVal)
         {
-            bEntradaConsultas += 1;
-            if (bEntradaConsultas == 1)
+            //bEntradaConsultas += 1;
+            //if (bEntradaConsultas == 1)
+            //{
+            //    oForm.PaneLevel = 61;
+            //    Folder6.Item.Click();
+            //}
+            oForm.PaneLevel = 6;
+
+            SAPbouiCOM.Folder oFolder = (SAPbouiCOM.Folder)oForm.Items.Item("Item_32").Specific;
+            if (oFolder.Selected)
             {
-                //oForm.PaneLevel = 61;
-                //((SAPbouiCOM.Folder)oForm.Items.Item("Item_32").Specific).Select();
+                oForm.PaneLevel = 61;
                 Folder6.Item.Click();
             }
-
-            SAPbouiCOM.Folder oFolder = (SAPbouiCOM.Folder)oForm.Items.Item("Item_63").Specific;
+            oFolder = (SAPbouiCOM.Folder)oForm.Items.Item("Item_33").Specific;
+            if (oFolder.Selected)
+            {
+                oForm.PaneLevel = 62;
+                Folder7.Item.Click();
+            }
+            oFolder = (SAPbouiCOM.Folder)oForm.Items.Item("Item_34").Specific;
+            if (oFolder.Selected)
+            {
+                oForm.PaneLevel = 63;
+                Folder8.Item.Click();
+            }
+            oFolder = (SAPbouiCOM.Folder)oForm.Items.Item("Item_63").Specific;
             if (oFolder.Selected)
             {
                 oForm.PaneLevel = 64;
